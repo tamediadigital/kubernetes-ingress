@@ -31,3 +31,5 @@ nginx-plus-ingress
 *.crt
 *.key
 
+# TDA
+build-scripts/

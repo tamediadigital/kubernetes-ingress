@@ -1,0 +1,26 @@
+machine:
+  services:
+    - docker
+
+general:
+  branches:
+    only:
+      - master
+
+dependencies:
+  post:
+    - aws s3 sync s3://tda-baikonur/build-scripts/ build-scripts/ && chmod +x build-scripts/*.sh
+
+test:
+  override:
+    - pushd nginx-controller ; go test ./... ; popd
+
+compile:
+  override:
+    - pushd nginx-controller ; CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags "-w -X main.version=$(../build-scripts/get-circle-env-var.sh MY_SERVICE_TAG)" -o nginx-ingress *.go ; popd
+
+deployment:
+  snapshot:
+    branch: master
+    commands:
+      - pushd nginx-controller ; ../build-scripts/docker-build-and-push.sh ; popd
