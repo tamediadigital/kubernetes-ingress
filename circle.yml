@@ -6,6 +6,7 @@ machine:
     GOROOT: ""
     PATH: "/usr/local/go/bin:/usr/local/go_workspace/bin:~/.go_workspace/bin:${PATH}"
     GOPATH: "${HOME}/.go_workspace:/usr/local/go_workspace:${HOME}/.go_project"
+    MYWORKDIR: "${HOME}/.go_project/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/nginx-controller"
 
 general:
   branches:
@@ -17,18 +18,18 @@ dependencies:
     - mkdir -p ~/.go_project/src/github.com/${CIRCLE_PROJECT_USERNAME}
     - ln -s ${HOME}/${CIRCLE_PROJECT_REPONAME} ${HOME}/.go_project/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
   post:
-    - aws s3 sync s3://tda-baikonur/build-scripts/ build-scripts/ && chmod +x build-scripts/*.sh
+    - cd ${MYWORKDIR} && aws s3 sync s3://tda-baikonur/build-scripts/ build-scripts/ && chmod +x build-scripts/*.sh
 
 test:
   override:
-    - cd nginx-controller && go test -v -race ./...
+    - cd ${MYWORKDIR} && go test -v -race ./...
 
 compile:
   override:
-    - cd nginx-controller && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-w -X main.version=$(../build-scripts/get-circle-env-var.sh MY_SERVICE_TAG)" -o nginx-ingress *.go
+    - cd ${MYWORKDIR} && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-w -X main.version=$(./build-scripts/get-circle-env-var.sh MY_SERVICE_TAG)" -o nginx-ingress *.go
 
 deployment:
   snapshot:
     branch: master
     commands:
-      - cd nginx-controller && ../build-scripts/docker-build-and-push.sh
+      - cd ${MYWORKDIR} && ./build-scripts/docker-build-and-push.sh
