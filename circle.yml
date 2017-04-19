@@ -16,8 +16,7 @@ dependencies:
   override:
     - mkdir -p ~/.go_project/src/github.com/${CIRCLE_PROJECT_USERNAME}
     - ln -s ${HOME}/${CIRCLE_PROJECT_REPONAME} ${HOME}/.go_project/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
-    - go get -t -d -v ./...
-    - go build -v
+    - cd nginx-controller && go get -t -d -v ./...
   post:
     - aws s3 sync s3://tda-baikonur/build-scripts/ build-scripts/ && chmod +x build-scripts/*.sh
 
