@@ -17,7 +17,7 @@ test:
 
 compile:
   override:
-    - pushd nginx-controller ; CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags "-w -X main.version=$(../build-scripts/get-circle-env-var.sh MY_SERVICE_TAG)" -o nginx-ingress *.go ; popd
+    - pushd nginx-controller ; CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-w -X main.version=$(../build-scripts/get-circle-env-var.sh MY_SERVICE_TAG)" -o nginx-ingress *.go ; popd
 
 deployment:
   snapshot:
